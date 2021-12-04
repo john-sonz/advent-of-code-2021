@@ -1,0 +1,193 @@
+# Day 4: Giant Squid
+
+## Part 1
+
+You're already almost 1.5km (almost a mile) below the surface of the ocean, already so deep that you can't see any sunlight. What you can see, however, is a giant squid that has attached itself to the outside of your submarine.
+
+Maybe it wants to play bingo?
+
+Bingo is played on a set of boards each consisting of a 5x5 grid of numbers. Numbers are chosen at random, and the chosen number is marked on all boards on which it appears. (Numbers may not appear on all boards.) If all numbers in any row or any column of a board are marked, that board wins. (Diagonals don't count.)
+
+The submarine has a bingo subsystem to help passengers (currently, you and the giant squid) pass the time. It automatically generates a random order in which to draw numbers and a random set of boards (your puzzle input). For example:
+
+```
+7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+
+22 13 17 11  0
+ 8  2 23  4 24
+21  9 14 16  7
+ 6 10  3 18  5
+ 1 12 20 15 19
+
+ 3 15  0  2 22
+ 9 18 13 17  5
+19  8  7 25 23
+20 11 10 24  4
+14 21 16 12  6
+
+14 21 17 24  4
+10 16 15  9 19
+18  8 23 26 20
+22 11 13  6  5
+ 2  0 12  3  7
+```
+
+After the first five numbers are drawn (7, 4, 9, 5, and 11), there are no winners, but the boards are marked as follows (shown here adjacent to each other to save space):
+
+```
+22 13 17 11  0         3 15  0  2 22        14 21 17 24  4
+ 8  2 23  4 24         9 18 13 17  5        10 16 15  9 19
+21  9 14 16  7        19  8  7 25 23        18  8 23 26 20
+ 6 10  3 18  5        20 11 10 24  4        22 11 13  6  5
+ 1 12 20 15 19        14 21 16 12  6         2  0 12  3  7
+```
+
+After the next six numbers are drawn (17, 23, 2, 0, 14, and 21), there are still no winners:
+
+```
+22 13 17 11  0         3 15  0  2 22        14 21 17 24  4
+ 8  2 23  4 24         9 18 13 17  5        10 16 15  9 19
+21  9 14 16  7        19  8  7 25 23        18  8 23 26 20
+ 6 10  3 18  5        20 11 10 24  4        22 11 13  6  5
+ 1 12 20 15 19        14 21 16 12  6         2  0 12  3  7
+```
+
+Finally, 24 is drawn:
+
+```
+22 13 17 11  0         3 15  0  2 22        14 21 17 24  4
+ 8  2 23  4 24         9 18 13 17  5        10 16 15  9 19
+21  9 14 16  7        19  8  7 25 23        18  8 23 26 20
+ 6 10  3 18  5        20 11 10 24  4        22 11 13  6  5
+ 1 12 20 15 19        14 21 16 12  6         2  0 12  3  7
+```
+
+At this point, the third board wins because it has at least one complete row or column of marked numbers (in this case, the entire top row is marked: 14 21 17 24 4).
+
+The score of the winning board can now be calculated. Start by finding the sum of all unmarked numbers on that board; in this case, the sum is 188. Then, multiply that sum by the number that was just called when the board won, 24, to get the final score, 188 * 24 = 4512.
+
+To guarantee victory against the giant squid, figure out which board will win first. What will your final score be if you choose that board?
+
+```elixir
+File.cd!("day4")
+```
+
+```elixir
+input =
+  "input.txt"
+  |> File.read!()
+  |> String.split("\n\n")
+
+[moves | boards] = input
+
+moves = moves |> String.split(",") |> Enum.map(&String.to_integer/1)
+
+boards =
+  boards
+  |> Enum.map(fn board_string ->
+    board_string
+    |> String.split("\n")
+    |> Enum.map(&String.split(&1, " ", trim: true))
+    |> Enum.map(fn row -> Enum.map(row, &String.to_integer/1) end)
+  end)
+```
+
+```elixir
+defmodule Bingo do
+  def new(board) do
+    board
+    |> Enum.with_index()
+    |> Enum.flat_map(fn {line, row} ->
+      line
+      |> Enum.with_index()
+      |> Enum.map(fn {num, collumn} -> {num, {row, collumn, false}} end)
+    end)
+    |> Enum.into(%{})
+  end
+
+  def mark(board, number) do
+    if Map.has_key?(board, number) do
+      Map.update!(board, number, fn {row, col, _} -> {row, col, true} end)
+    else
+      board
+    end
+  end
+
+  def won?(board) do
+    board
+    |> Map.values()
+    |> Enum.filter(&elem(&1, 2))
+    |> Enum.reduce(%{}, fn {row, col, _}, acc ->
+      acc
+      |> Map.update({:row, row}, 1, fn r -> r + 1 end)
+      |> Map.update({:col, col}, 1, fn c -> c + 1 end)
+    end)
+    |> Map.values()
+    |> Enum.any?(&(&1 == 5))
+  end
+
+  def score(board, last_number) do
+    board
+    |> Map.to_list()
+    |> Enum.filter(fn {_, {_, _, marked?}} -> not marked? end)
+    |> Enum.map(fn {num, _} -> num end)
+    |> Enum.sum()
+    |> then(&(&1 * last_number))
+  end
+
+  def print(board) do
+    swapped_board =
+      board
+      |> Map.new(fn {key, {r, c, m}} -> {{r, c}, {key, m}} end)
+
+    for row <- 0..4 do
+      for col <- 0..4 do
+        {n, m?} = Map.get(swapped_board, {row, col})
+        IO.write("#{n}#{if m?, do: "x", else: "o"} ")
+      end
+
+      IO.write("\n")
+    end
+
+    board
+  end
+end
+
+bingos = Enum.map(boards, &Bingo.new/1)
+
+Enum.reduce_while(moves, bingos, fn move, bingos ->
+  bingos = Enum.map(bingos, &Bingo.mark(&1, move))
+
+  case Enum.filter(bingos, &Bingo.won?/1) do
+    [] ->
+      {:cont, bingos}
+
+    won_bingos ->
+      {:halt, Enum.map(won_bingos, &Bingo.score(&1, move))}
+  end
+end)
+```
+
+## Part 2
+
+On the other hand, it might be wise to try a different strategy: let the giant squid win.
+
+You aren't sure how many bingo boards a giant squid could play at once, so rather than waste time counting its arms, the safe thing to do is to figure out which board will win last and choose that one. That way, no matter which boards it picks, it will win for sure.
+
+In the above example, the second board is the last to win, which happens after 13 is eventually called and its middle column is completely marked. If you were to keep playing until this point, the second board would have a sum of unmarked numbers equal to 148 for a final score of 148 * 13 = 1924.
+
+Figure out which board will win last. Once it wins, what would its final score be?
+
+```elixir
+Enum.reduce_while(moves, bingos, fn move, bingos ->
+  bingos = Enum.map(bingos, &Bingo.mark(&1, move))
+
+  case Enum.filter(bingos, &(not Bingo.won?(&1))) do
+    [] ->
+      {:halt, Enum.map(bingos, &Bingo.score(&1, move))}
+
+    playing_boards ->
+      {:cont, playing_boards}
+  end
+end)
+```
