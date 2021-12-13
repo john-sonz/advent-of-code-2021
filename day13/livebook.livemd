@@ -1,0 +1,301 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# Day 13: Transparent Origami
+
+## Part 1
+
+You reach another volcanically active part of the cave. It would be nice if you could do some kind of thermal imaging so you could tell ahead of time which caves are too hot to safely enter.
+
+Fortunately, the submarine seems to be equipped with a thermal camera! When you activate it, you are greeted with:
+
+Congratulations on your purchase! To activate this infrared thermal imaging
+camera system, please enter the code found on page 1 of the manual.
+Apparently, the Elves have never used this feature. To your surprise, you manage to find the manual; as you go to open it, page 1 falls out. It's a large sheet of transparent paper! The transparent paper is marked with random dots and includes instructions on how to fold it up (your puzzle input). For example:
+
+```
+6,10
+0,14
+9,10
+0,3
+10,4
+4,11
+6,0
+6,12
+4,1
+0,13
+10,12
+3,4
+3,0
+8,4
+1,10
+2,14
+8,10
+9,0
+
+fold along y=7
+fold along x=5
+```
+
+The first section is a list of dots on the transparent paper. 0,0 represents the top-left coordinate. The first value, x, increases to the right. The second value, y, increases downward. So, the coordinate 3,0 is to the right of 0,0, and the coordinate 0,7 is below 0,0. The coordinates in this example form the following pattern, where # is a dot on the paper and . is an empty, unmarked position:
+
+```
+...#..#..#.
+....#......
+...........
+#..........
+...#....#.#
+...........
+...........
+...........
+...........
+...........
+.#....#.##.
+....#......
+......#...#
+#..........
+#.#........
+```
+
+Then, there is a list of fold instructions. Each instruction indicates a line on the transparent paper and wants you to fold the paper up (for horizontal y=... lines) or left (for vertical x=... lines). In this example, the first fold instruction is fold along y=7, which designates the line formed by all of the positions where y is 7 (marked here with -):
+
+```
+...#..#..#.
+....#......
+...........
+#..........
+...#....#.#
+...........
+...........
+-----------
+...........
+...........
+.#....#.##.
+....#......
+......#...#
+#..........
+#.#........
+```
+
+Because this is a horizontal line, fold the bottom half up. Some of the dots might end up overlapping after the fold is complete, but dots will never appear exactly on a fold line. The result of doing this fold looks like this:
+
+```
+#.##..#..#.
+#...#......
+......#...#
+#...#......
+.#.#..#.###
+...........
+...........
+```
+
+Now, only 17 dots are visible.
+
+Notice, for example, the two dots in the bottom left corner before the transparent paper is folded; after the fold is complete, those dots appear in the top left corner (at 0,0 and 0,1). Because the paper is transparent, the dot just below them in the result (at 0,3) remains visible, as it can be seen through the transparent paper.
+
+Also notice that some dots can end up overlapping; in this case, the dots merge together and become a single dot.
+
+The second fold instruction is fold along x=5, which indicates this line:
+
+```
+#.##.|#..#.
+#...#|.....
+.....|#...#
+#...#|.....
+.#.#.|#.###
+.....|.....
+.....|.....
+```
+
+Because this is a vertical line, fold left:
+
+```
+#####
+#...#
+#...#
+#...#
+#####
+.....
+.....
+```
+
+The instructions made a square!
+
+The transparent paper is pretty big, so for now, focus on just completing the first fold. After the first fold in the example above, 17 dots are visible - dots that end up overlapping after the fold is completed count as a single dot.
+
+How many dots are visible after completing just the first fold instruction on your transparent paper?
+
+```elixir
+File.cd!("day13")
+```
+
+```output
+:ok
+```
+
+```elixir
+{commands, coords} =
+  File.read!("input.txt")
+  |> String.split("\n", trim: true)
+  |> Enum.split_with(&String.starts_with?(&1, "fold"))
+
+coords =
+  coords
+  |> Enum.map(&String.split(&1, ","))
+  |> Enum.map(fn c -> Enum.map(c, &String.to_integer/1) end)
+
+commands =
+  Enum.map(commands, fn "fold along " <> args ->
+    [axis, coord] = String.split(args, "=")
+    {String.to_atom(axis), String.to_integer(coord)}
+  end)
+
+map = Enum.into(coords, MapSet.new(), &List.to_tuple/1)
+
+{commands, map}
+```
+
+```output
+{[x: 655, y: 447, x: 327, y: 223, x: 163, y: 111, x: 81, y: 55, x: 40, y: 27, y: 13, y: 6],
+ #MapSet<[
+   {1134, 793},
+   {929, 339},
+   {21, 383},
+   {763, 393},
+   {1134, 442},
+   {214, 298},
+   {966, 56},
+   {1034, 842},
+   {601, 168},
+   {1114, 112},
+   {783, 485},
+   {745, 306},
+   {902, 91},
+   {1088, 733},
+   {1265, 170},
+   {120, 162},
+   {1258, 701},
+   {957, 298},
+   {228, 891},
+   {852, 345},
+   {400, 12},
+   {112, 618},
+   {768, 36},
+   {30, 450},
+   {782, 276},
+   {776, 408},
+   {1155, 114},
+   {932, 52},
+   {1096, 596},
+   {281, 718},
+   {1257, 168},
+   {1257, 723},
+   {197, 227},
+   {78, 96},
+   {972, 324},
+   {229, 189},
+   {875, 290},
+   {574, 14},
+   {281, 802},
+   {224, 492},
+   {917, 166},
+   {1250, 722},
+   {1111, 442},
+   {251, 131},
+   {338, 548},
+   {604, 681},
+   {944, ...},
+   {...},
+   ...
+ ]>}
+```
+
+```elixir
+
+```
+
+```output
+:a
+:b
+:c
+```
+
+```output
+:ok
+```
+
+```elixir
+defmodule Paper do
+  def fold(map, {:x, coord}) do
+    map
+    |> Enum.map(fn {x, y} ->
+      cond do
+        x < coord -> {x, y}
+        x >= coord -> {2 * coord - x, y}
+      end
+    end)
+    |> MapSet.new()
+  end
+
+  def fold(map, {:y, coord}) do
+    map
+    |> Enum.map(fn {x, y} ->
+      cond do
+        y < coord -> {x, y}
+        y >= coord -> {x, 2 * coord - y}
+      end
+    end)
+    |> MapSet.new()
+  end
+
+  def print(map) do
+    {{max_x, _}, {_, max_y}} = {Enum.max_by(map, &elem(&1, 0)), Enum.max_by(map, &elem(&1, 1))}
+
+    for y <- 0..max_y, into: "" do
+      for x <- 0..max_x, into: "" do
+        if MapSet.member?(map, {x, y}), do: "#", else: "."
+      end <> "\n"
+    end
+    |> IO.puts()
+  end
+end
+```
+
+```output
+{:module, Paper, <<70, 79, 82, 49, 0, 0, 13, ...>>, {:print, 1}}
+```
+
+```elixir
+map
+|> Paper.fold(hd(commands))
+|> MapSet.size()
+```
+
+```output
+765
+```
+
+## Part 2
+
+Finish folding the transparent paper according to the instructions. The manual says the code is always eight capital letters.
+
+What code do you use to activate the infrared thermal imaging camera system?
+
+```elixir
+commands
+|> Enum.reduce(map, &Paper.fold(&2, &1))
+|> Paper.print()
+```
+
+```output
+###..####.#..#.####.#....###...##..#..#
+#..#....#.#.#.....#.#....#..#.#..#.#..#
+#..#...#..##.....#..#....#..#.#....####
+###...#...#.#...#...#....###..#.##.#..#
+#.#..#....#.#..#....#....#....#..#.#..#
+#..#.####.#..#.####.####.#.....###.#..#
+
+```
+
+```output
+:ok
+```
