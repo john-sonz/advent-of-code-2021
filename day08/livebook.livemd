@@ -1,3 +1,5 @@
+<!-- vim: set syntax=markdown: -->
+
 <!-- livebook:{"persist_outputs":true} -->
 
 # Day 8: Seven Segment Search
@@ -81,7 +83,7 @@ Because the digits 1, 4, 7, and 8 each use a unique number of segments, you shou
 In the output values, how many times do digits 1, 4, 7, or 8 appear?
 
 ```elixir
-File.cd!("day8")
+File.cd!("day08")
 ```
 
 ```output

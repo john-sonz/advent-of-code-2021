@@ -1,3 +1,5 @@
+<!-- vim: set syntax=markdown: -->
+
 <!-- livebook:{"persist_outputs":true} -->
 
 # Day 9: Smoke Basin
@@ -29,7 +31,7 @@ The risk level of a low point is 1 plus its height. In the above example, the ri
 Find all of the low points on your heightmap. What is the sum of the risk levels of all low points on your heightmap?
 
 ```elixir
-File.cd("day9")
+File.cd("day09")
 ```
 
 ```output

@@ -1,3 +1,5 @@
+<!-- vim: set syntax=markdown: -->
+
 <!-- livebook:{"persist_outputs":true} -->
 
 # Day 6: Lanternfish
@@ -61,7 +63,7 @@ In this example, after 18 days, there are a total of 26 fish. After 80 days, the
 Find a way to simulate lanternfish. How many lanternfish would there be after 80 days?
 
 ```elixir
-File.cd!("day6")
+File.cd!("day06")
 ```
 
 ```output

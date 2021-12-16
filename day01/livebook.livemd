@@ -1,3 +1,5 @@
+<!-- vim: set syntax=markdown: -->
+
 <!-- livebook:{"persist_outputs":true} -->
 
 # Day 1: Sonar Sweep
@@ -57,7 +59,7 @@ In this example, there are 7 measurements that are larger than the previous meas
 How many measurements are larger than the previous measurement?
 
 ```elixir
-File.cd!("day1")
+File.cd!("day01")
 ```
 
 ```output
@@ -74,7 +76,7 @@ input =
 ```
 
 ```output
-["input.txt", "task.livemd"]
+["input.txt", "livebook.livemd"]
 ```
 
 ```output

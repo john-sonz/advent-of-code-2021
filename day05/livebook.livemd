@@ -1,3 +1,5 @@
+<!-- vim: set syntax=markdown: -->
+
 <!-- livebook:{"persist_outputs":true} -->
 
 # Day 5: Hydrothermal Venture
@@ -50,7 +52,7 @@ To avoid the most dangerous areas, you need to determine the number of points wh
 Consider only horizontal and vertical lines. At how many points do at least two lines overlap?
 
 ```elixir
-File.cd!("day5")
+File.cd!("day05")
 ```
 
 ```output
